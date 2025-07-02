@@ -27,23 +27,26 @@ class DataIngestion:
             raise NetworkSecurityException(e,sys)
         
     def export_collection_as_dataframe(self):
-        """
-        Read data from mongodb
-        """
+  
         try:
-            database_name=self.data_ingestion_config.database_name
-            collection_name=self.data_ingestion_config.collection_name
-            self.mongo_client=pymongo.MongoClient(MONGO_DB_URL)
-            collection=self.mongo_client[database_name][collection_name]
-
-            df=pd.DataFrame(list(collection.find()))
-            if "_id" in df.columns.to_list():
-                df=df.drop(columns=["_id"],axis=1)
-            
-            df.replace({"na":np.nan},inplace=True)
+        # Path to your local CSV file
+            csv_file_path = "Network_Data/phisingData.csv"
+        
+            # Check if file exists
+            if not os.path.exists(csv_file_path):
+                raise Exception(f"CSV file not found at: {csv_file_path}")
+        
+        # Read CSV file
+            df = pd.read_csv(csv_file_path)
+        
+        # Clean data (same as MongoDB version)
+            df.replace({"na": np.nan}, inplace=True)
+        
+            logging.info(f"Successfully loaded {len(df)} records from local CSV file")
             return df
+        
         except Exception as e:
-            raise NetworkSecurityException
+            raise NetworkSecurityException(e, sys)
         
     def export_data_into_feature_store(self,dataframe: pd.DataFrame):
         try:
